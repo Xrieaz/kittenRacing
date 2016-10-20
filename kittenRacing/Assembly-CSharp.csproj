@@ -45,6 +45,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\MyDebug.cs" />
+     <Compile Include="Assets\Scripts\Bezier.cs" />
+     <Compile Include="Assets\Scripts\Bezier3D.cs" />
+     <Compile Include="Assets\Scripts\ExtrudeShape.cs" />
+     <Compile Include="Assets\Scripts\SmoothFollow.cs" />
+     <Compile Include="Assets\Scripts\Track.cs" />
+     <Compile Include="Assets\Simple Vehicles\Scripts\CameraController.cs" />
+     <Compile Include="Assets\Simple Vehicles\Scripts\SimpleCarController.cs" />
      <Compile Include="Assets\TrackBuildR\Scripts\TrackBuildR.cs" />
      <Compile Include="Assets\TrackBuildR\Scripts\TrackBuildRCamera.cs" />
      <Compile Include="Assets\TrackBuildR\Scripts\TrackBuildRColours.cs" />
@@ -65,6 +73,7 @@
      <Compile Include="Assets\TrackBuildR\Scripts\Utils\ShaderProperties.cs" />
      <Compile Include="Assets\TrackBuildR\Scripts\Utils\SplineMaths.cs" />
      <Compile Include="Assets\TrackBuildR\Scripts\Utils\XMLVariableConverter.cs" />
+     <Compile Include="Assets\WaypointController.cs" />
      <Compile Include="Assets\_stufff\Button.cs" />
      <None Include="Assets\Kitten\Shaders\Normal-Diffuse.shader" />
      <None Include="Assets\Kitten\Shaders\Alpha-Diffuse.shader" />
