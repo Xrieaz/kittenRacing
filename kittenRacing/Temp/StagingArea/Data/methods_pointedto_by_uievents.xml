@@ -1,0 +1,14 @@
+<linker>
+	<assembly fullname="Assembly-CSharp-firstpass">
+		<type fullname="UnityStandardAssets.CrossPlatformInput.ButtonHandler">
+			<method name="SetAxisNeutralState"/>
+			<method name="SetAxisPositiveState"/>
+			<method name="SetAxisNegativeState"/>
+			<method name="SetAxisNeutralState"/>
+			<method name="SetDownState"/>
+			<method name="SetUpState"/>
+			<method name="SetDownState"/>
+			<method name="SetUpState"/>
+		</type>
+	</assembly>
+</linker>

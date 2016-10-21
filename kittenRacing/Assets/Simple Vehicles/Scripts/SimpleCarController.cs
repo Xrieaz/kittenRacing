@@ -31,9 +31,17 @@ public class SimpleCarController : MonoBehaviour
 
     private int m_pathIndex = 0;
 
+    float timerToStart = 3;
+    float time = 0;
+
     void Start()
     {
         GetComponent<Rigidbody>().centerOfMass = centerOfMassCorrection;
+        GetComponent<Rigidbody>().useGravity = false;
+        if (!playerControlled)
+        {
+            maxMotorTorque += (Random.Range(0, 40) - 20);
+        }
     }
 
 
@@ -58,103 +66,104 @@ public class SimpleCarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        float motor = maxMotorTorque;
-        float steering = 0;
-
-        Vector3 targetPos = new Vector3(m_currentBezier.GetPath()[m_pathIndex].position.x, 0, m_currentBezier.GetPath()[m_pathIndex].position.z);
-        Vector3 myPos = new Vector3(this.transform.position.x, 0, this.transform.position.z);
-
-        m_targetDir = targetPos - myPos;
-
-//        Debug.DrawLine(myPos, targetPos);
-//        Vector3 tempDir = this.transform.rotation.eulerAngles;
-
-
-//        Debug.Log("m_targetDir.sqrMagnitude: " + m_targetDir.sqrMagnitude);
-
-        if (m_targetDir.sqrMagnitude < 100)
+        if (time <= timerToStart)
         {
-            m_pathIndex++;
-            if (m_pathIndex >= m_currentBezier.GetPath().Length)
+            time += Time.fixedDeltaTime;
+            if (time > timerToStart)
             {
-                m_pathIndex = 0;
-                m_currentBezier = m_currentBezier.nextSegment;
+                GetComponent<Rigidbody>().useGravity = true;
             }
-        }
-
-//        float angle = this.transform.rotation.eulerAngles.y;
-
-        
-
-        if (playerControlled)
-        {
-            steering = maxSteeringAngle * CrossPlatformInputManager.GetAxis("Horizontal");
         }
         else
         {
-//            targetPos.x = m_currentBezier.GetPath()[m_pathIndex].position.x;
-//            targetPos.z = m_currentBezier.GetPath()[m_pathIndex].position.z;
+            if (this.transform.position.y <= -20)
+            {
+                if (m_pathIndex - 1 < 0)
+                {
+                    this.transform.position = new Vector3(m_currentBezier.prevSegment.GetPath()[m_currentBezier.prevSegment.GetPath().Length - 1].position.x, m_currentBezier.prevSegment.GetPath()[m_currentBezier.prevSegment.GetPath().Length - 1].position.y + 1, m_currentBezier.prevSegment.GetPath()[m_currentBezier.prevSegment.GetPath().Length - 1].position.z);
+                }
+                else
+                {
+                    this.transform.position = new Vector3(m_currentBezier.GetPath()[m_pathIndex - 1].position.x, m_currentBezier.GetPath()[m_pathIndex - 1].position.y + 1, m_currentBezier.GetPath()[m_pathIndex - 1].position.z);
+                }
+                this.transform.LookAt(m_currentBezier.GetPath()[m_pathIndex].position);
+            }
+
+            float motor = maxMotorTorque;
+            float steering = 0;
+
+            Vector3 targetPos = new Vector3(m_currentBezier.GetPath()[m_pathIndex].position.x, 0, m_currentBezier.GetPath()[m_pathIndex].position.z);
+            Vector3 myPos = new Vector3(this.transform.position.x, 0, this.transform.position.z);
+
             m_targetDir = targetPos - myPos;
 
-            float angleBetween = 0.0F;
-
-//            Vector3 lDirection = new Vector3(0, Mathf.Sin(Mathf.Deg2Rad * angle), Mathf.Cos(Mathf.Deg2Rad * angle));
-
-//            Vector3 newRight = Vector3.Cross(myPos, m_targetDir.normalized);
-
-
-            angleBetween = Vector3.Angle(this.transform.right, m_targetDir);
-
-
-            float modifier = 0;
-
-            if (angleBetween - 90 > 5)
+            if (m_targetDir.sqrMagnitude < 100)
             {
-                modifier = -1;
-            }
-            else if (angleBetween - 90 < -5)
-            {
-                modifier = 1;
+                m_pathIndex++;
+                if (m_pathIndex >= m_currentBezier.GetPath().Length)
+                {
+                    m_pathIndex = 0;
+                    m_currentBezier = m_currentBezier.nextSegment;
+                }
             }
 
-//            float modifier = ((angleBetween - 90) + maxSteeringAngle) / maxSteeringAngle;
-
-//            modifier = Mathf.Clamp(modifier, -1, 1);
-//            modifier *= -1;
-
-//            Debug.Log("modifier: " + modifier);
-            steering = modifier * maxSteeringAngle;
-        }
-
-
-        foreach (AxleInfo axleInfo in axleInfos)
-        {
-            if (axleInfo.steering)
+            if (playerControlled)
             {
-                axleInfo.leftWheel.steerAngle = steering;
-                axleInfo.rightWheel.steerAngle = steering;
-            }
-
-            if (axleInfo.motor)
-            {
-                axleInfo.leftWheel.motorTorque = motor;
-                axleInfo.rightWheel.motorTorque = motor;
-            }
-
-            //Braking
-            if (braking)
-            {
-                axleInfo.leftWheel.brakeTorque = brakeForce;
-                axleInfo.rightWheel.brakeTorque = brakeForce;
+                steering = maxSteeringAngle * CrossPlatformInputManager.GetAxis("Horizontal");
             }
             else
             {
-                axleInfo.leftWheel.brakeTorque = 0;
-                axleInfo.rightWheel.brakeTorque = 0;
+                m_targetDir = targetPos - myPos;
+
+                float angleBetween = 0.0F;
+
+                angleBetween = Vector3.Angle(this.transform.right, m_targetDir);
+
+
+                float modifier = 0;
+
+                if (angleBetween - 90 > 5)
+                {
+                    modifier = -1;
+                }
+                else if (angleBetween - 90 < -5)
+                {
+                    modifier = 1;
+                }
+
+                steering = modifier * maxSteeringAngle;
             }
 
-            ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-            ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+
+            foreach (AxleInfo axleInfo in axleInfos)
+            {
+                if (axleInfo.steering)
+                {
+                    axleInfo.leftWheel.steerAngle = steering;
+                    axleInfo.rightWheel.steerAngle = steering;
+                }
+
+                if (axleInfo.motor)
+                {
+                    axleInfo.leftWheel.motorTorque = motor;
+                    axleInfo.rightWheel.motorTorque = motor;
+                }
+
+                //Braking
+                if (braking)
+                {
+                    axleInfo.leftWheel.brakeTorque = brakeForce;
+                    axleInfo.rightWheel.brakeTorque = brakeForce;
+                }
+                else
+                {
+                    axleInfo.leftWheel.brakeTorque = 0;
+                    axleInfo.rightWheel.brakeTorque = 0;
+                }
+
+                ApplyLocalPositionToVisuals(axleInfo.leftWheel);
+                ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+            }
         }
     }
 }
